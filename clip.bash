@@ -110,7 +110,9 @@ cmd_clip() {
 
     # Either copy existing one or generate a new one
     if ls "$PASSWORD_STORE_DIR/$passfile.gpg" >/dev/null 2>&1; then
-        cmd_show "$passfile" --clip || exit 1
+        ( set -o pipefail; cmd_show "$passfile" | head -n 1 | head -c -1 | wl-copy )
+        if [ "$?" -ne 0 ]; then exit 1; fi
+        ( sleep 45 && wl-copy -c ) &
     else
         cmd_generate "$passfile" "$length" $symbols --clip || exit 1
     fi
